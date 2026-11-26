@@ -11,6 +11,7 @@ h1{margin:0 0 4px;font-size:14px;letter-spacing:.15em;opacity:.85}
 .unit{font-size:28px;font-weight:800}
 .row{display:flex;justify-content:space-between;font-size:13px;margin-top:8px;opacity:.9}
 #qr{background:#fff;padding:12px;border-radius:12px;margin-top:16px;display:grid;place-items:center}
+button{display:block;margin:12px auto 0;padding:10px 18px;border:0;border-radius:8px;font-size:15px;font-weight:600}
 small{display:block;text-align:center;margin-top:10px;opacity:.7}
 </style></head><body>
 <div class="card">
@@ -19,6 +20,7 @@ small{display:block;text-align:center;margin-top:10px;opacity:.7}
   <div class="unit" id="unit"></div>
   <div class="row"><span>Card ID: <b id="cid"></b></span><span>Floors: <b id="fl"></b></span></div>
   <div id="qr"></div>
+  <button id="save">Save QR image</button>
   <small>Demo only. Not a real access card.</small>
 </div>
 <script>
@@ -29,4 +31,13 @@ document.getElementById("unit").textContent = CARD.unit;
 document.getElementById("cid").textContent = CARD.id;
 document.getElementById("fl").textContent = CARD.floors.join(", ");
 new QRCode(document.getElementById("qr"), {text: CARD.id, width: 200, height: 200});
+document.getElementById("save").onclick=()=>{
+  const src=document.querySelector("#qr canvas");
+  const m=40,o=document.createElement("canvas");
+  o.width=src.width+2*m;o.height=src.height+2*m;
+  const x=o.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,o.width,o.height);
+  x.drawImage(src,m,m);
+  const a=document.createElement("a");a.download="lift-card-qr-"+CARD.id+".png";
+  a.href=o.toDataURL("image/png");document.body.appendChild(a);a.click();a.remove();
+};
 </script></body></html>
