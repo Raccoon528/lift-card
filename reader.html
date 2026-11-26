@@ -20,17 +20,17 @@ button{margin:12px;padding:12px 20px;font-size:16px;border:0;border-radius:8px}
 const ALLOWED = { "LC-0001": { unit: "B 23-03A", floors: [23] } };
 const REQUEST_FLOOR = 23; // floor button being pressed
 const st = document.getElementById("status"), v = document.getElementById("v"),
-      c = document.getElementById("c"), ctx = c.getContext("2d");
+      c = document.getElementById("c"), ctx = c.getContext("2d",{willReadFrequently:true});
 let last = "", lastT = 0;
 function beep(ok){const a=new AudioContext(),o=a.createOscillator();o.frequency.value=ok?880:200;
   o.connect(a.destination);o.start();setTimeout(()=>o.stop(),ok?150:400);}
-function check(id){
+let timer;
+function show(cls,msg,ms){clearTimeout(timer);st.className=cls;st.textContent=msg;window.scrollTo(0,0);timer=setTimeout(()=>{st.className="";st.textContent="Ready";},ms);}
+function check(id,ms=2500){
   const e = ALLOWED[id];
   const ok = e && e.floors.includes(REQUEST_FLOOR);
-  st.className = ok ? "ok" : "no";
-  st.textContent = ok ? `ACCESS GRANTED · ${e.unit} · Floor ${REQUEST_FLOOR}` : "ACCESS DENIED";
-  beep(ok);
-  setTimeout(()=>{st.className="";st.textContent="Ready";},2500);
+  show(ok?"ok":"no", ok ? `ACCESS GRANTED · ${e.unit} · Floor ${REQUEST_FLOOR}` : "ACCESS DENIED", ms);
+  try{beep(ok);}catch(_){}
 }
 function tick(){
   if(v.readyState===v.HAVE_ENOUGH_DATA){
@@ -43,14 +43,15 @@ function tick(){
 document.getElementById("pick").onclick=()=>document.getElementById("file").click();
 document.getElementById("file").onchange=e=>{
   const f=e.target.files[0]; if(!f) return;
+  show("","Checking image...",8000);
   const img=new Image();
   img.onload=()=>{
     c.width=img.naturalWidth;c.height=img.naturalHeight;ctx.drawImage(img,0,0);
     const q=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height);
     URL.revokeObjectURL(img.src);
-    if(q) check(q.data); else {st.className="no";st.textContent="No QR code found in that image";}
+    if(q) check(q.data,8000); else show("no","No QR code found in that image",8000);
   };
-  img.onerror=()=>{st.className="no";st.textContent="Could not read that image";};
+  img.onerror=()=>show("no","Could not read that image",8000);
   img.src=URL.createObjectURL(f); e.target.value="";
 };
 document.getElementById("go").onclick=async()=>{
