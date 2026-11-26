@@ -11,7 +11,9 @@ video{width:100%;max-width:480px;margin-top:12px;border-radius:12px}
 button{margin:12px;padding:12px 20px;font-size:16px;border:0;border-radius:8px}
 </style></head><body>
 <div id="status">Tap Start, then show a card QR</div>
-<button id="go">Start camera</button><br>
+<button id="go">Start camera</button>
+<button id="pick">Upload photo / screenshot</button>
+<input id="file" type="file" accept="image/*" hidden><br>
 <video id="v" playsinline muted></video><canvas id="c" hidden></canvas>
 <script>
 // The reader (not the card) decides who may go where, like a real lift controller.
@@ -38,6 +40,19 @@ function tick(){
   }
   requestAnimationFrame(tick);
 }
+document.getElementById("pick").onclick=()=>document.getElementById("file").click();
+document.getElementById("file").onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const img=new Image();
+  img.onload=()=>{
+    c.width=img.naturalWidth;c.height=img.naturalHeight;ctx.drawImage(img,0,0);
+    const q=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height);
+    URL.revokeObjectURL(img.src);
+    if(q) check(q.data); else {st.className="no";st.textContent="No QR code found in that image";}
+  };
+  img.onerror=()=>{st.className="no";st.textContent="Could not read that image";};
+  img.src=URL.createObjectURL(f); e.target.value="";
+};
 document.getElementById("go").onclick=async()=>{
   try{v.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
     await v.play();st.textContent="Ready";tick();}
