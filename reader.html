@@ -17,8 +17,8 @@ button{margin:12px;padding:12px 20px;font-size:16px;border:0;border-radius:8px}
 <video id="v" playsinline muted></video><canvas id="c" hidden></canvas>
 <script>
 // The reader (not the card) decides who may go where, like a real lift controller.
-const ALLOWED = { "LC-0001": { unit: "B 12-05A", floors: [12] } };
-const REQUEST_FLOOR = 12; // floor button being pressed
+const ALLOWED = { "LC-0001": { unit: "B 23-03A", floors: [23] } };
+const REQUEST_FLOOR = 23; // floor button being pressed
 const st = document.getElementById("status"), v = document.getElementById("v"),
       c = document.getElementById("c"), ctx = c.getContext("2d");
 let last = "", lastT = 0;
