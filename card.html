@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lift Access Card</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f172a;font-family:system-ui,sans-serif}
+.card{width:min(92vw,360px);background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border-radius:18px;padding:20px;box-shadow:0 10px 30px #0008}
+h1{margin:0 0 4px;font-size:14px;letter-spacing:.15em;opacity:.85}
+.name{font-size:22px;font-weight:700;margin:12px 0 2px}
+.unit{font-size:28px;font-weight:800}
+.row{display:flex;justify-content:space-between;font-size:13px;margin-top:8px;opacity:.9}
+#qr{background:#fff;padding:12px;border-radius:12px;margin-top:16px;display:grid;place-items:center}
+small{display:block;text-align:center;margin-top:10px;opacity:.7}
+</style></head><body>
+<div class="card">
+  <h1>LIFT ACCESS CARD · SCHOOL PROJECT DEMO</h1>
+  <div class="name" id="name"></div>
+  <div class="unit" id="unit"></div>
+  <div class="row"><span>Card ID: <b id="cid"></b></span><span>Floors: <b id="fl"></b></span></div>
+  <div id="qr"></div>
+  <small>Demo only. Not a real access card.</small>
+</div>
+<script>
+// EDIT THESE
+const CARD = { id: "LC-0001", name: "Your Name", unit: "B 12-05A", floors: [12] };
+document.getElementById("name").textContent = CARD.name;
+document.getElementById("unit").textContent = CARD.unit;
+document.getElementById("cid").textContent = CARD.id;
+document.getElementById("fl").textContent = CARD.floors.join(", ");
+new QRCode(document.getElementById("qr"), {text: CARD.id, width: 200, height: 200});
+</script></body></html>

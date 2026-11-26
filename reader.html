@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lift Reader</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<style>
+body{margin:0;font-family:system-ui,sans-serif;background:#0f172a;color:#fff;text-align:center}
+#status{padding:18px;font-size:22px;font-weight:700;background:#334155;transition:background .2s}
+.ok{background:#16a34a!important}.no{background:#dc2626!important}
+video{width:100%;max-width:480px;margin-top:12px;border-radius:12px}
+button{margin:12px;padding:12px 20px;font-size:16px;border:0;border-radius:8px}
+</style></head><body>
+<div id="status">Tap Start, then show a card QR</div>
+<button id="go">Start camera</button><br>
+<video id="v" playsinline muted></video><canvas id="c" hidden></canvas>
+<script>
+// The reader (not the card) decides who may go where, like a real lift controller.
+const ALLOWED = { "LC-0001": { unit: "B 12-05A", floors: [12] } };
+const REQUEST_FLOOR = 12; // floor button being pressed
+const st = document.getElementById("status"), v = document.getElementById("v"),
+      c = document.getElementById("c"), ctx = c.getContext("2d");
+let last = "", lastT = 0;
+function beep(ok){const a=new AudioContext(),o=a.createOscillator();o.frequency.value=ok?880:200;
+  o.connect(a.destination);o.start();setTimeout(()=>o.stop(),ok?150:400);}
+function check(id){
+  const e = ALLOWED[id];
+  const ok = e && e.floors.includes(REQUEST_FLOOR);
+  st.className = ok ? "ok" : "no";
+  st.textContent = ok ? `ACCESS GRANTED · ${e.unit} · Floor ${REQUEST_FLOOR}` : "ACCESS DENIED";
+  beep(ok);
+  setTimeout(()=>{st.className="";st.textContent="Ready";},2500);
+}
+function tick(){
+  if(v.readyState===v.HAVE_ENOUGH_DATA){
+    c.width=v.videoWidth;c.height=v.videoHeight;ctx.drawImage(v,0,0);
+    const q=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height);
+    if(q && (q.data!==last || Date.now()-lastT>3000)){last=q.data;lastT=Date.now();check(q.data);}
+  }
+  requestAnimationFrame(tick);
+}
+document.getElementById("go").onclick=async()=>{
+  try{v.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+    await v.play();st.textContent="Ready";tick();}
+  catch(e){st.textContent="Camera blocked. Needs HTTPS and permission.";}
+};
+</script></body></html>
